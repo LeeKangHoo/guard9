@@ -16,7 +16,7 @@
 // 3번 이동 하면 extentions의 길이가 있는 위치이기 때문에 해당 값을 읽어 저장해둠
 
 
-int tls_parse(std::size_t payload_length, unsigned char* payload,std::unordered_set<std::string>* blocked_domains);
+int detect_sni(std::size_t payload_length, unsigned char* payload,std::unordered_set<std::string>* blocked_domains);
 
 #pragma pack(push,1)
 struct tls_record{
@@ -36,7 +36,3 @@ struct tls_client_hello{
 };
 #pragma pack(pop)
 
-
-// struct tls_extentions{
-
-// };

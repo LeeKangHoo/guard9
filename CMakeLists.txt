@@ -14,6 +14,8 @@ add_executable(guard9
     src/tls.cpp
     src/tcp.cpp
     src/ip.cpp
+    src/network_engine.cpp
+    src/config_loader.cpp
 )
 
 target_include_directories(guard9 PRIVATE

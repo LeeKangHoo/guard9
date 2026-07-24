@@ -1,6 +1,6 @@
 #include "tls.h"
 
-int tls_parse(std::size_t payload_length, unsigned char* payload,std::unordered_set<std::string>* blocked_domains){
+int detect_sni(std::size_t payload_length, unsigned char* payload,std::unordered_set<std::string>* blocked_domains){
     unsigned char* cursor = payload;
     unsigned char* end = payload + payload_length;
 
