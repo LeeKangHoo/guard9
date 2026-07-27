@@ -10,7 +10,6 @@ github.com
 www.github.com
 example.com
 www.example.com
-chatgpt.com
 facebook.com
 instagram.com
 nine9.kr

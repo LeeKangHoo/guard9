@@ -22,15 +22,15 @@ void wrong_command(){
     std::getline(std::cin, pause);
 }
 
-void save_domains(std::vector<std::string>* domains){
-    std::ofstream file("config/blocked_domains.txt");
+void save_file(std::vector<std::string>* elements,std::string file_path){
+    std::ofstream file(file_path);
     
     if (!file.is_open()){
-        std::cout << "blocked_domains.txt open failed" << std::endl;
+        std::cout << file_path <<" open failed" << std::endl;
     }
 
-    for (const std::string& domain : *domains){
-        file << domain << '\n';
+    for (const std::string& element : *elements){
+        file << element << '\n';
     }
 
     file.close();
@@ -112,7 +112,7 @@ int manage_domains(guard9_config* config)
             }
             
             
-            save_domains(&config->domains);
+            save_file(&config->domains,"config/blocked_domains.txt");
         } 
         else if(command == "remove") {
             // 삭제 로직
@@ -134,7 +134,121 @@ int manage_domains(guard9_config* config)
                 continue;
             }
 
-            save_domains(&config->domains);
+            save_file(&config->domains,"config/blocked_domains.txt");
+        } 
+        else if (command == "q") {
+            return 0;
+        }
+        else {
+            wrong_command();
+            continue;
+        }
+    }
+
+    return 0;
+}
+
+int manage_ips(guard9_config* config){
+    int page = 0;
+    while(true){
+        std::cout << "\033[2J\033[H" << std::flush;
+        std::cout << "current blocked ips" <<std::endl;
+        for (int i = 0; i < 10; i++){
+            int cur = page * 10 + i;
+            if (config->ips.size()<=cur){
+                break;
+            }
+            std::cout << cur+1 << ". " << config->ips[cur] << std::endl;
+        }
+
+        std::cout << std::endl;
+        std::cout << "next : n, previous : p, quit : q" << std::endl;
+        std::cout << std::endl;
+        std::cout << "intput : ";
+        std::string input;
+        std::string command;
+        std::string first;
+        std::string extra;
+        std::getline(std::cin,input);
+
+        std::istringstream cmd(input);
+        if (!(cmd >> command)){ // 아무 입력이 없을 때 
+            wrong_command();
+            continue;
+        }
+        if (!(cmd >> first)){ // 이러면 하나도 입력안했을때는 못잡음 아니지 add naver.com / q
+            if (command == "q"){
+                return 0;
+            }
+            else if (command == "n"){
+                // 1 -> 2
+                // 23 / 1
+                // 20  
+                if ((page+1)*10 < config->ips.size()){
+                    page++;
+                }
+                continue;
+            }
+            else if (command == "p")
+            {
+                if (page > 0){
+                    page--;
+                }
+                continue;
+            }
+            wrong_command();
+            continue;
+        }
+        else if (cmd >> extra){
+            wrong_command();
+            continue;
+        }
+
+        if (command == "add"){
+            //추가 로직
+            bool inserted = false;
+            std::uint32_t raw_ip;
+            inet_pton(AF_INET,first.c_str(),&raw_ip);
+            {
+                std::lock_guard<std::mutex> ip_lock(config->config_mtx);
+                inserted = config->blocked_ips.insert(raw_ip).second;
+                if (inserted){
+                    config->ips.push_back(first);
+                }
+            }
+            if (!inserted){
+                std::cout << "ip is already exist" << std::endl;
+                std::string tmp;
+                std::getline(std::cin,tmp);
+                continue;
+            }
+            
+            
+            save_file(&config->ips,"config/blocked_ips.txt");
+        }
+        else if(command == "remove") {
+            // 삭제 로직
+            std::vector<std::string>::iterator find_result;
+            bool removed = false;
+            std::uint32_t raw_ip;
+            inet_pton(AF_INET,first.c_str(),&raw_ip);
+            {
+                std::lock_guard<std::mutex> ip_lock(config->config_mtx);
+                find_result = std::find(config->ips.begin(),config->ips.end(),first);
+                if (find_result != config->ips.end()){
+                    config->blocked_ips.erase(raw_ip);
+                    config->ips.erase(find_result);
+                    removed = true;
+                }
+            }
+            if (!removed){
+                std::cout << "can't found ip" << std::endl;
+                std::string tmp;
+                std::getline(std::cin,tmp);
+                continue;
+            }
+
+            save_file(&config->ips,"config/blocked_ips.txt");
         } 
         else if (command == "q") {
             return 0;
@@ -149,13 +263,15 @@ int manage_domains(guard9_config* config)
 }
 
 
+
 int start_cli(guard9_config* config){
     while (true){
         std::cout << "\033[2J\033[H" << std::flush;
         std::cout << guard9_logo << std::endl;
         std::cout << "1. manage block domain" <<std::endl;
+        std::cout << "2. manage block ip" << std::endl;
         for (int i = 0;i < 5 ; i++){
-        std::cout << std::endl;
+            std::cout << std::endl;
         }
         std::cout << "intput : ";
 
@@ -174,7 +290,11 @@ int start_cli(guard9_config* config){
 
         if (command == "1"){
             manage_domains(config);
-        }else{
+        }
+        else if(command == "2"){
+            manage_ips(config);
+        }
+        else{
             wrong_command();
             continue;
         }
