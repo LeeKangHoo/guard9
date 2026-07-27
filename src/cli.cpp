@@ -23,10 +23,10 @@ void wrong_command(){
 }
 
 void save_domains(std::vector<std::string>* domains){
-    std::ofstream file("config/target.txt");
+    std::ofstream file("config/blocked_domains.txt");
     
     if (!file.is_open()){
-        std::cout << "target.txt open failed" << std::endl;
+        std::cout << "blocked_domains.txt open failed" << std::endl;
     }
 
     for (const std::string& domain : *domains){

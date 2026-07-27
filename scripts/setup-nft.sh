@@ -19,7 +19,9 @@ fi
 
 nft add table inet guard9
 nft 'add chain inet guard9 output { type filter hook output priority 0; policy accept; }'
-nft add rule inet guard9 output ip protocol tcp tcp dport 443 queue num 0 bypass
+nft 'add chain inet guard9 input { type filter hook input priority 0; policy accept; }'
+nft add rule inet guard9 output meta nfproto ipv4 queue num 0 bypass
+nft add rule inet guard9 input meta nfproto ipv4 queue num 0 bypass
 
-echo "guard9 outbound HTTPS queue rule installed"
+echo "guard9 IPv4 input/output queue rules installed"
 nft list table inet guard9

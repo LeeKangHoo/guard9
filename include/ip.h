@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <arpa/inet.h>
+#include "config_loader.h"
 
 #pragma pack(push,1)
 
@@ -25,3 +26,5 @@ struct ip_hdr {
 #pragma pack(pop)
 
 std::uint16_t ip_checksum(ip_hdr* iphdr,int len);
+
+bool detect_ip(ip_hdr* iphdr,guard9_config* config);
