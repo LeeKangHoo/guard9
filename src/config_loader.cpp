@@ -1,4 +1,6 @@
 #include "config_loader.h"
+#include <fstream>
+#include <iostream>
 
 
 int config_load(guard9_config* config){
@@ -18,6 +20,7 @@ int config_load(guard9_config* config){
         continue;
         }
         config->blocked_domains.insert(domain);
+        config->domains.push_back(domain);
     }
     std::cout << config->blocked_domains.size() << " domains loaded" << std::endl;
     return 0;

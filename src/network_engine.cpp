@@ -98,7 +98,7 @@ int cb(nfq_q_handle* q,nfgenmsg* message, nfq_data* packet, void* user_data){
 
     // tls 함수 (payload 길이, payload) 
     // target.txt안에 있는 dns 탐지하고 판별하는 함수
-    int result = detect_sni(payload_length-ip_length-tcp_length,payload+ip_length+tcp_length,&context->config->blocked_domains);
+    int result = detect_sni(payload_length-ip_length-tcp_length,payload+ip_length+tcp_length,context->config);
     if (result == 1){
 
         // rst 패킷 보내기 위해 직접 만들어서 보내는 구간

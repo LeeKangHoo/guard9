@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <cstring>
 #include <unordered_set>
+#include <vector>
+#include <mutex>
 
 #include <arpa/inet.h>
 #include <linux/netfilter.h>

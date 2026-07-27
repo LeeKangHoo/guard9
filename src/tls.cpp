@@ -1,6 +1,6 @@
 #include "tls.h"
 
-int detect_sni(std::size_t payload_length, unsigned char* payload,std::unordered_set<std::string>* blocked_domains){
+int detect_sni(std::size_t payload_length, unsigned char* payload,guard9_config* config){
     unsigned char* cursor = payload;
     unsigned char* end = payload + payload_length;
 
@@ -69,7 +69,8 @@ int detect_sni(std::size_t payload_length, unsigned char* payload,std::unordered
         // if (server_name == "naver.com" || server_name == "www.naver.com"){
         //     return 1;
         // }
-        if (blocked_domains->find(server_name) != blocked_domains->end()){
+        std::lock_guard<std::mutex> detect_lock(config->config_mtx);
+        if (config->blocked_domains.find(server_name) != config->blocked_domains.end()){
             std::cout << server_name << " is detected!!" << std::endl;
             return 1;
         }

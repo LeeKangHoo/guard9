@@ -16,6 +16,7 @@ add_executable(guard9
     src/ip.cpp
     src/network_engine.cpp
     src/config_loader.cpp
+    src/cli.cpp
 )
 
 target_include_directories(guard9 PRIVATE

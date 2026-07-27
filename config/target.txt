@@ -1,2 +1,17 @@
 naver.com
 www.naver.com
+www.nine9.kr
+naver.com
+www.naver.com
+google.com
+www.google.com
+youtube.com
+www.youtube.com
+github.com
+www.github.com
+example.com
+www.example.com
+chatgpt.com
+www.chatgpt.com
+facebook.com
+instagram.com
