@@ -26,3 +26,18 @@ std::uint16_t tcp_checksum(tcp_hdr* packet,tcp_pseudo_hdr* tcp_pseudo,int len){
     return htons(checksum);
 
 }
+
+bool detect_port(tcp_hdr* tcphdr,guard9_config* config){
+    std::lock_guard<std::mutex> detect_lock(config->config_mtx);
+    if (config->blocked_ports.find(tcphdr->src_port) != config->blocked_ports.end()){
+        std::cout << ntohs(tcphdr->src_port) << " is detected!!" << std::endl;
+        return true;
+    }
+    else if (config->blocked_ports.find(tcphdr->dst_port) != config->blocked_ports.end()){
+        std::cout << ntohs(tcphdr->dst_port) << " is detected!!" << std::endl;
+        return true;
+    }
+
+
+    return false;
+}

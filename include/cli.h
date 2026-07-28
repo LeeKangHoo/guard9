@@ -10,4 +10,6 @@ int manage_domains(guard9_config* config);
 
 int manage_ips(guard9_config* config);
 
+int manage_ports(guard9_config* config);
+
 int start_cli(guard9_config* config);

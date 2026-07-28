@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "ip.h"
+#include "config_loader.h"
 
 #pragma pack(push,1)
 
@@ -47,3 +48,5 @@ struct tcp_pseudo_hdr{
 #pragma pack(pop)
 
 std::uint16_t tcp_checksum(tcp_hdr* packet,tcp_pseudo_hdr* tcp_pseudo,int len);
+
+bool detect_port(tcp_hdr* tcphdr,guard9_config* config);

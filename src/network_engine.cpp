@@ -107,6 +107,65 @@ int cb(nfq_q_handle* q,nfgenmsg* message, nfq_data* packet, void* user_data){
     std::memcpy(&tcphdr, payload+ip_length,sizeof(tcphdr));
     int tcp_length = tcphdr.offset * 4;
 
+    if (tcphdr.flags & 0x04){
+        return nfq_set_verdict(q,packet_id,NF_ACCEPT,0,nullptr);
+    }
+
+    bool detect_port_result = detect_port(&tcphdr,context->config);
+    if (detect_port_result){
+        tcp_rst_packet tcp_rst{};
+        tcp_rst.iphdr.ihl = 5;
+        tcp_rst.iphdr.version = 4;
+        tcp_rst.iphdr.tos = iphdr.tos;
+        tcp_rst.iphdr.length = htons(40);
+        tcp_rst.iphdr.id = 0;
+        // 0x4000 Don't fragment
+        tcp_rst.iphdr.offset = htons(0x4000);
+        tcp_rst.iphdr.ttl = 65;
+        tcp_rst.iphdr.protocol = 6;
+        tcp_rst.iphdr.checksum = 0;
+        tcp_rst.iphdr.src_address = iphdr.dst_address; 
+        tcp_rst.iphdr.dst_address = iphdr.src_address;
+        tcp_rst.iphdr.checksum = ip_checksum(&tcp_rst.iphdr,tcp_rst.iphdr.ihl);
+        tcp_rst.tcphdr.src_port = tcphdr.dst_port;
+        tcp_rst.tcphdr.dst_port = tcphdr.src_port;
+        // ack flag 확인
+        if ((tcphdr.flags & 0x10) == 0){
+            tcp_rst.tcphdr.seq = 0;
+            tcp_rst.tcphdr.ack = htonl(ntohl(tcphdr.seq)+1);
+            tcp_rst.tcphdr.flags = 0x14;
+        }
+        else{
+            tcp_rst.tcphdr.seq = tcphdr.ack;
+            tcp_rst.tcphdr.ack = 0;
+            tcp_rst.tcphdr.flags = 0x04;
+        }
+        // tcp_rst.tcphdr.seq = tcphdr.ack;
+        // tcp_rst.tcphdr.ack = 0;
+        tcp_rst.tcphdr.rsv = 0;
+        tcp_rst.tcphdr.offset = 5;
+        // tcp_rst.tcphdr.flags = 0x04;
+        tcp_rst.tcphdr.window = 0;
+        tcp_rst.tcphdr.checksum = 0;
+        tcp_rst.tcphdr.urgent_ptr = 0;
+        tcp_pseudo_hdr tcp_pseudo{};
+        tcp_pseudo.src_address = iphdr.dst_address;
+        tcp_pseudo.dst_address = iphdr.src_address;
+        tcp_pseudo.zero = 0;
+        tcp_pseudo.protocol = 6;
+        tcp_pseudo.length = htons(20);
+        tcp_rst.tcphdr.checksum = tcp_checksum(&tcp_rst.tcphdr,&tcp_pseudo,tcp_rst.tcphdr.offset);
+        sockaddr_in destination{};
+        destination.sin_family = AF_INET;
+        destination.sin_port = 0;
+        destination.sin_addr.s_addr = iphdr.src_address;
+        ssize_t sent = sendto(context->raw_socket_fd,&tcp_rst,sizeof(tcp_rst),0,reinterpret_cast<const sockaddr*>(&destination),sizeof(destination));
+        if (sent < 0){
+            std::cout << "sendto error" << std::endl;
+        }
+        return nfq_set_verdict(q,packet_id,NF_DROP,0,nullptr);
+    }
+    
     if (payload_length - ip_length - tcp_length <= 5){
         return nfq_set_verdict(q,packet_id,NF_ACCEPT,0,nullptr);
     }

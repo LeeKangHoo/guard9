@@ -10,6 +10,9 @@ struct guard9_config{
 
     std::unordered_set<std::uint32_t> blocked_ips;
     std::vector<std::string> ips;
+
+    std::unordered_set<std::uint16_t> blocked_ports;
+    std::vector<std::string> ports;
 };
 
 int config_load(guard9_config* config);
