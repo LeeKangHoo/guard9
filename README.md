@@ -4,9 +4,7 @@
   <img width="622" height="354" alt="guard9 실행 화면" src="https://github.com/user-attachments/assets/b7a34a3a-a51e-4553-b2a5-e004ccceed63">
 </p>
 
-Netfilter는 리눅스 커널 내부에서 네트워크 패킷을 검사하고, 수정하거나 차단할 수 있도록 제공되는 프레임워크입니다.
-
-Netfilter를 활용해 개발한 리눅스용 네트워크 보안 프로젝트입니다.
+Netfilter를 활용한 ip/port/도메인 차단 프로그램
 
 ## 주요 기능
 
